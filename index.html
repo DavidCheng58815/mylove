@@ -1,1 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To My Dear...</title>
+    <!-- 引入 Google 字體，增加質感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 基礎設定 */
+        :root {
+            --bg-color: #fdfaf6; /* 溫暖的米白底色 */
+            --text-main: #4a4a4a;
+            --accent-color: #d4a373; /* 質感焦糖奶茶色 */
+            --heart-color: #e07a5f;
+        }
 
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Noto Serif TC', serif;
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        h1, h2, h3 {
+            font-weight: 400;
+        }
+
+        .eng-font {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        /* 第一屏：打字機開場 */
+        #hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .typewriter h1 {
+            font-size: 1.5rem;
+            margin: 0 auto;
+            border-right: .15em solid var(--accent-color);
+            white-space: nowrap;
+            overflow: hidden;
+            letter-spacing: 2px;
+            /* 動態設定寬度在 JS 中完成，以適應不同長度 */
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            animation: bounce 2s infinite;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
+        }
+
+        /* 滾動動畫共用 Class */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+            will-change: opacity, visibility;
+            margin: 10vh auto;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        /* 圖文排版區塊 */
+        .story-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .story-img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            object-fit: cover;
+        }
+
+        /* 互動：拍立得翻轉卡片 */
+        .polaroid-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            width: 300px;
+            height: 380px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        /* 點擊後觸發翻轉 */
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            background-color: #fff;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .flip-card-front img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .polaroid-caption {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #777;
+        }
+
+        .flip-card-back {
+            background-color: var(--accent-color);
+            color: white;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .flip-card-back p {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        /* 最終信件區塊 */
+        .letter-paper {
+            background-color: #fff;
+            padding: 40px 30px;
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin: 80px auto;
+            position: relative;
+            max-width: 600px;
+        }
+
+        .letter-paper::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--accent-color),
+                var(--accent-color) 10px,
+                transparent 10px,
+                transparent 20px
+            );
+        }
+
+        /* 愛心按鈕 */
+        .action-section {
+            text-align: center;
+            padding-bottom: 100px;
+        }
+
+        .btn-magic {
+            background-color: var(--heart-color);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 4px 15px rgba(224, 122, 95, 0.4);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-magic:active {
+            transform: scale(0.95);
+        }
+
+        /* 飄落愛心特效 */
+        .floating-heart {
+            position: fixed;
+            color: var(--heart-color);
+            pointer-events: none;
+            z-index: 9999;
+            transition: top 2s cubic-bezier(0.25, 1, 0.5, 1), 
+                        left 2s cubic-bezier(0.25, 1, 0.5, 1), 
+                        opacity 1s ease,
+                        transform 2s ease;
+            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 0;
+        }
+
+        /* 音樂控制按鈕 */
+        .music-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            backdrop-filter: blur(5px);
+        }
+
+        .music-btn.playing {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .music-icon {
+            display: inline-block;
+        }
+
+        .music-btn.playing .music-icon {
+            animation: spin 3s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* 手機版適應 */
+        @media (min-width: 768px) {
+            .story-block {
+                flex-direction: row;
+                text-align: left;
+            }
+            .story-block:nth-child(even) {
+                flex-direction: row-reverse;
+            }
+            .story-text {
+                flex: 1;
+                padding: 0 30px;
+            }
+            .story-img {
+                width: 50%;
+            }
+            .typewriter h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 背景音樂區塊 -->
+    <!-- 加上 autoplay 讓支援的裝置自動播放 -->
+    <audio id="bg-music" loop autoplay>
+        <!-- 音樂路徑不變，除非您也想把它放在資料夾裡，那就會變成 ./audios/xxx.mp3 之類的 -->
+        <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf7f5.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- 浮動音樂按鈕 -->
+    <button id="music-btn" class="music-btn">
+        <span class="music-icon">🎵</span> <span id="music-text">點擊播放</span>
+    </button>
+
+    <!-- 第一屏：首頁打字效果 -->
+    <section id="hero">
+        <div class="typewriter">
+            <h1 id="type-text">嗨 劭瑩，這是一封為你準備的，遲來的信...</h1>
+        </div>
+        <div class="scroll-indicator" id="scroll-hint">
+            向下滾動<br>↓
+        </div>
+    </section>
+
+    <!-- 第二屏：圖文故事 (會隨滾動浮現) -->
+    <section class="fade-in-section">
+        <div class="story-block">
+            <video class="story-img" autoplay loop muted playsinline>
+                <!-- 📷修改這裡：指向 videos 資料夾中的影片檔名，例如 memory1.mp4 -->
+                <source src="./videos/Video_1.mp4" type="video/mp4">
+                您的瀏覽器不支援影片播放。
+            </video>
+            <div class="story-text">
+                <h2 class="eng-font">The Beginning</h2>
+                <p>回想 50 天前，因為我的一句話你選擇赴約，而開啟了我們故事的篇章。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="fade-in-section">
+        <div class="story-block">
+            <!-- 📷修改這裡：指向 images 資料夾中的照片檔名，例如 photo1.jpg -->
+            <img src="./images/K(1).jpg" alt="我們的回憶" class="story-img">
+            <div class="story-text">
+                <h2 class="eng-font">Our Moments</h2>
+                <p>這 50 天裡，你讓我重新對於感情有了信心，也讓我會想要好好照顧你。跟你的相處，真的很像回到學生時期那時候的純樸。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第三屏：互動拍立得 -->
+    <section class="fade-in-section text-center" style="text-align: center;">
+        <h2>點擊下面的照片看看🤫</h2>
+        <div class="polaroid-container">
+            
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <video autoplay loop muted playsinline style="width: 100%; height: 280px; object-fit: cover; border-radius: 4px;">
+                            <!-- 📷修改這裡：指向 videos 資料夾中的影片檔名，例如 memory2.mp4 -->
+                            <source src="./videos/Video_2.mp4" type="video/mp4">
+                        </video>
+                        <div class="polaroid-caption">某個特別的日子</div>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>我是個很沒安全感的人，<br>應該從每天都陪你回家<br>感受的到吧XD</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <!-- 📷修改這裡：指向 images 資料夾中的照片檔名，例如 photo2.jpg -->
+                        <img src="./images/k(2).jpg" alt="拍立得">
+                        <div class="polaroid-caption">最喜歡的一張</div>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>我不完美，<br>但為了你，<br>我會努力改掉那些壞毛病。</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 第四屏：正式信件內容 -->
+    <section class="fade-in-section">
+        <div class="letter-paper">
+            <h2 style="margin-top: 0; color: var(--accent-color);">致 劭瑩，寶寶，my Dear：</h2>
+            
+            <p>這封信比我原本想像中來得晚了一些，也沒有準備得像我心裡期待的那麼完美。對此，我真的想跟妳說一聲抱歉。</p>
+            
+            <p>我原本很想把這件事做好，想用一個特別的方式，把這段時間以來想對妳說的話，好好地交到妳面前。雖然過程中還是有些不完美，但這封信裡的每一句話，都是我很真心想讓妳知道的。</p>
+            
+            <p>回想起 50 天前，因為我的一句話，妳選擇赴約，也因此開啟了屬於我們兩個人的故事。</p>
+            
+            <p>這 50 天裡，妳讓我重新對感情有了信心，也讓我開始有一種很自然的念頭：我想好好照顧妳，想陪著妳，也想讓妳在我身邊的時候，可以感到安心。</p>
+            
+            <p>跟妳相處的感覺，對我來說很特別。那種感覺很像回到學生時期，很純粹、很自在，可以聊很多心事，也可以聊很多天馬行空的事情。很多時候只是跟妳待在一起，我就覺得很舒服。</p>
+            
+            <p>我知道自己有時候講話很白爛，也常常用一些看起來不太正經的方式在表達在意。像是開玩笑、嘴硬、反諷，甚至有時候會用讓妳不喜歡的方式來掩飾自己的不安。其實我知道，這些不一定是好的表達方式，也可能讓妳覺得不舒服。</p>
+            
+            <p>但我想讓妳知道，那不是因為我不重視妳，而是因為我太在意妳了。只是以前的我，不一定懂得怎麼把這份在意說得好、做得好。</p>
+            
+            <p>我也知道，這段時間我們之間有些溝通，很多時候是因為我的情緒、沒安全感，或是自尊心太高造成的。老實說，我不是一個完美的人，有時候也會陰晴不定，會嘴硬，會逞強，會因為一些小事突然不開心。</p>
+            
+            <p>但這些日子以來，妳願意包容我、理解我，也讓我更清楚看見自己需要調整的地方。謝謝妳沒有只是看見我的不好，也謝謝妳願意讓我有機會慢慢變得更好。</p>
+            
+            <p>前幾天妳感覺到我有不開心，其實我答應過要跟妳說清楚。原因很簡單，是因為我不太喜歡被拒絕，尤其是當那件事情是我很想為妳做的時候。後來我自己也想了想，感情不是要求對方照著自己的方式走，而是要學會尊重彼此的感受。</p>
+            
+            <p>所以我想跟妳說，之後我會更努力學著，不把自己的期待變成妳的壓力。</p>
+            
+            <p>另外，我有時候嘴巴上會說什麼「妳可以去找別人」之類的話，其實那不是真的希望妳去找別人。那比較像是我心裡不安時，嘴硬說出來的反話。真正的意思是，我害怕自己不夠好，害怕自己有些地方讓妳失望。</p>
+            
+            <p>但我也知道，這樣的表達方式不好。與其用反諷去說我在意，不如坦白告訴妳：我其實很珍惜妳，也很在乎我們之間的關係。</p>
+            
+            <p>我不敢說自己現在已經是最好的樣子，但我願意為了妳，也為了我們，慢慢把那些不好的習慣修掉。不是用嘴巴說說而已，而是希望妳能在接下來的相處裡，真的感受到我有在改變。</p>
+            
+            <p>我曾經跟妳說過，我自己並不完美，所以我也不會要求另一半一定要多完美。我真正希望的是，我們可以一起成為更好的人，一起創造一種舒服、安心、可以依靠彼此的生活。</p>
+            
+            <p>最後，謝謝妳讓我走進妳的生活。</p>
+            
+            <p>未來會怎麼樣，我不想用太多漂亮話去保證，但我知道，此刻的我很珍惜妳，也很珍惜每一次跟妳相處的時間。我會好好把握妳，也會努力讓妳知道，妳在我心裡，是很重要、很特別的存在。</p>
+            
+            <p style="font-weight: 600; font-size: 1.1rem; color: var(--heart-color);">我愛妳，劭瑩。</p>
+            
+            <p style="text-align: right; margin-top: 40px; font-weight: 600; font-family: 'Playfair Display', serif;">By 大D</p>
+        </div>
+    </section>
+
+    <!-- 結尾互動按鈕 -->
+    <section class="action-section fade-in-section">
+        <button class="btn-magic" onclick="createHearts(this)">如果你感受到了，請點擊這裡 ❤️</button>
+    </section>
+
+    <!-- 動態腳本區 -->
+    <script>
+        // 1. 處理開場打字機特效
+        document.addEventListener('DOMContentLoaded', () => {
+            const textElement = document.getElementById('type-text');
+            const text = textElement.innerText;
+            textElement.innerText = '';
+            
+            textElement.style.width = '0';
+            textElement.style.animation = `typing ${text.length * 0.15}s steps(${text.length}, end) forwards, blink-caret .75s step-end infinite`;
+            
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes typing {
+                    from { width: 0 }
+                    to { width: 100% }
+                }
+                @keyframes blink-caret {
+                    from, to { border-color: transparent }
+                    50% { border-color: var(--accent-color); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            setTimeout(() => {
+                document.getElementById('scroll-hint').style.opacity = '1';
+            }, text.length * 150 + 500);
+
+            let i = 0;
+            const typeWriter = setInterval(() => {
+                if (i < text.length) {
+                    textElement.innerHTML += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typeWriter);
+                }
+            }, 150);
+        });
+
+        // 2. 處理滾動浮現特效
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in-section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // 3. 處理愛心飄落並排成文字特效
+        let isAnimating = false;
+
+        function createHearts(btn) {
+            if (isAnimating) return;
+            isAnimating = true;
+            
+            const originalText = btn.innerText;
+            btn.innerText = "心意傳送中...";
+            btn.style.opacity = "0.7";
+            btn.style.cursor = "not-allowed";
+
+            const text = "Love You";
+            const points = getTextPoints(text);
+
+            if (points.length === 0) {
+                isAnimating = false;
+                return;
+            }
+
+            points.forEach((point, i) => {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '❤';
+                    heart.className = 'floating-heart';
+                    
+                    const startX = Math.random() * window.innerWidth;
+                    const startY = window.innerHeight + 50;
+
+                    heart.style.left = startX + 'px';
+                    heart.style.top = startY + 'px';
+                    const size = Math.random() * 8 + 8; 
+                    heart.style.fontSize = size + 'px';
+                    heart.style.opacity = '1';
+
+                    document.body.appendChild(heart);
+                    void heart.offsetWidth;
+
+                    heart.style.left = point.x + 'px';
+                    heart.style.top = point.y + 'px';
+                    heart.style.transform = 'translate(-50%, -50%) scale(1)';
+
+                    setTimeout(() => {
+                        heart.style.opacity = '0';
+                        heart.style.transform = 'translate(-50%, -50%) scale(3)';
+                        
+                        setTimeout(() => {
+                            heart.remove();
+                        }, 1000);
+                    }, 5000);
+
+                }, Math.random() * 1000); 
+            });
+
+            setTimeout(() => {
+                isAnimating = false;
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
+                btn.style.cursor = "pointer";
+            }, 7000);
+        }
+
+        function getTextPoints(text) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            const fontSize = Math.min(width * 0.18, 120);
+            ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'red';
+
+            ctx.fillText(text, width / 2, height / 2);
+
+            const imageData = ctx.getImageData(0, 0, width, height).data;
+            const points = [];
+
+            const gap = width < 768 ? 5 : 8;
+
+            for (let y = 0; y < height; y += gap) {
+                for (let x = 0; x < width; x += gap) {
+                    const index = (y * width + x) * 4;
+                    const alpha = imageData[index + 3];
+                    if (alpha > 128) {
+                        points.push({ x, y });
+                    }
+                }
+            }
+            return points;
+        }
+
+        // 4. 背景音樂控制邏輯 (全新升級版)
+        const musicBtn = document.getElementById('music-btn');
+        const bgMusic = document.getElementById('bg-music');
+        const musicText = document.getElementById('music-text');
+        let isMusicPlaying = false;
+
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicText.innerText = "點擊播放";
+                musicBtn.classList.remove('playing');
+                isMusicPlaying = false;
+            } else {
+                // 使用 Promise 處理播放，避免瀏覽器阻擋時出現錯誤
+                const playPromise = bgMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        musicText.innerText = "音樂播放中";
+                        musicBtn.classList.add('playing');
+                        isMusicPlaying = true;
+                    }).catch(error => {
+                        console.log("自動播放被瀏覽器阻擋，等待使用者互動:", error);
+                        isMusicPlaying = false;
+                    });
+                }
+            }
+        }
+
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // 避免點擊按鈕觸發 body 點擊事件
+            toggleMusic();
+        });
+
+        // ✨ 神奇破解法：只要對方觸控螢幕、點擊或滑動，就立刻開始播放！
+        const startMusicOnInteraction = () => {
+            if (!isMusicPlaying) {
+                toggleMusic();
+            }
+            // 成功觸發後，把這些監聽器移除，避免浪費效能
+            ['click', 'touchstart', 'scroll'].forEach(evt => {
+                window.removeEventListener(evt, startMusicOnInteraction);
+            });
+        };
+
+        // 綁定三個最常見的使用者動作
+        ['click', 'touchstart', 'scroll'].forEach(evt => {
+            window.addEventListener(evt, startMusicOnInteraction, { once: true });
+        });
+        
+    </script>
+</body>
+</html>
