@@ -306,12 +306,14 @@
 <body>
 
     <!-- 背景音樂區塊 -->
-    <!-- 加上 autoplay 讓支援的裝置自動播放 -->
+    <!-- 加上 autoplay 讓支援的裝置自動播放 
     <audio id="bg-music" loop autoplay>
-        <!-- 音樂路徑不變，除非您也想把它放在資料夾裡，那就會變成 ./audios/xxx.mp3 之類的 -->
+        音樂路徑不變，除非您也想把它放在資料夾裡，那就會變成 ./audios/xxx.mp3 之類的 
         <source src="https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf7f5.mp3" type="audio/mpeg">
-    </audio>
-    
+    </audio> -->
+    <audio id="bg-music" loop preload="auto">
+    <source src="./music/music.mp3" type="audio/mpeg">
+</audio>
     <!-- 浮動音樂按鈕 -->
     <button id="music-btn" class="music-btn">
         <span class="music-icon">🎵</span> <span id="music-text">點擊播放</span>
@@ -594,48 +596,34 @@
         }
 
         // 4. 背景音樂控制邏輯 (全新升級版)
-        const musicBtn = document.getElementById('music-btn');
-        const bgMusic = document.getElementById('bg-music');
-        const musicText = document.getElementById('music-text');
-        let isMusicPlaying = false;
+        // 4. 背景音樂控制邏輯
+const musicBtn = document.getElementById('music-btn');
+const bgMusic = document.getElementById('bg-music');
+const musicText = document.getElementById('music-text');
 
-        function toggleMusic() {
-            if (isMusicPlaying) {
-                bgMusic.pause();
-                musicText.innerText = "點擊播放";
-                musicBtn.classList.remove('playing');
-                isMusicPlaying = false;
-            } else {
-                // 使用 Promise 處理播放，避免瀏覽器阻擋時出現錯誤
-                const playPromise = bgMusic.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        musicText.innerText = "音樂播放中";
-                        musicBtn.classList.add('playing');
-                        isMusicPlaying = true;
-                    }).catch(error => {
-                        console.log("自動播放被瀏覽器阻擋，等待使用者互動:", error);
-                        isMusicPlaying = false;
-                    });
-                }
-            }
+let isMusicPlaying = false;
+
+musicBtn.addEventListener('click', async function () {
+    try {
+        if (!isMusicPlaying) {
+            bgMusic.volume = 0.6;
+            await bgMusic.play();
+
+            isMusicPlaying = true;
+            musicText.innerText = "音樂播放中";
+            musicBtn.classList.add('playing');
+        } else {
+            bgMusic.pause();
+
+            isMusicPlaying = false;
+            musicText.innerText = "點擊播放";
+            musicBtn.classList.remove('playing');
         }
-
-        musicBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // 避免點擊按鈕觸發 body 點擊事件
-            toggleMusic();
-        });
-
-        // ✨ 神奇破解法：只要對方觸控螢幕、點擊或滑動，就立刻開始播放！
-        const startMusicOnInteraction = () => {
-            if (!isMusicPlaying) {
-                toggleMusic();
-            }
-            // 成功觸發後，把這些監聽器移除，避免浪費效能
-            ['click', 'touchstart', 'scroll'].forEach(evt => {
-                window.removeEventListener(evt, startMusicOnInteraction);
-            });
-        };
+    } catch (error) {
+        console.log("音樂播放失敗：", error);
+        musicText.innerText = "請再點一次播放";
+    }
+});
 
         // 綁定三個最常見的使用者動作
         ['click', 'touchstart', 'scroll'].forEach(evt => {
